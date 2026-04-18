@@ -9,28 +9,22 @@ body {
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-size-adjust: 100%;
 }
 
-h1, h2, h3, h4 { margin: 0 0 var(--space-3); font-weight: 600; letter-spacing: -0.01em; }
-h1 { font-size: 1.6rem; }
-h2 { font-size: 1.3rem; }
+h1, h2, h3, h4 { margin: 0 0 var(--space-3); font-weight: 700; letter-spacing: -0.02em; }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.35rem; }
 h3 { font-size: 1.05rem; }
 
 p { margin: 0 0 var(--space-3); }
 
 a { color: var(--c-primary); text-decoration: none; }
-a:hover { text-decoration: underline; }
 
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
-input, select, textarea {
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-}
+input, select, textarea { font-family: inherit; font-size: 16px; color: inherit; }
 
 .hidden { display: none !important; }
 
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
+::selection { background: var(--c-primary); color: #fff; }

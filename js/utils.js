@@ -1,4 +1,3 @@
-// Utilidades compartidas
 const Utils = (() => {
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
@@ -26,8 +25,8 @@ const Utils = (() => {
     el.className = `toast ${type}`;
     el.textContent = msg;
     box.appendChild(el);
-    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; }, 2800);
-    setTimeout(() => el.remove(), 3300);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; }, 2500);
+    setTimeout(() => el.remove(), 3000);
   };
 
   const confirmar = (msg) => Promise.resolve(window.confirm(msg));
@@ -38,14 +37,12 @@ const Utils = (() => {
     return Math.round(valor / p) * p;
   };
 
-  // Calcula costo unitario teniendo merma (en %)
+  // Costo unitario = precio / cantidad base (sin merma)
   const costoUnitarioIng = (ing) => {
     const precio = parseNum(ing.precio);
     const cantidad = parseNum(ing.cantidad) || 1;
-    const merma = parseNum(ing.merma) / 100;
-    const rendimiento = 1 - merma;
-    if (rendimiento <= 0) return 0;
-    return precio / (cantidad * rendimiento);
+    if (cantidad <= 0) return 0;
+    return precio / cantidad;
   };
 
   const modal = (() => {
@@ -86,5 +83,7 @@ const Utils = (() => {
     return 'badge badge-green';
   };
 
-  return { uid, fmtMoney, fmtPct, parseNum, debounce, toast, confirmar, redondear, costoUnitarioIng, modal, colorMargen };
+  const esc = (s = '') => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  return { uid, fmtMoney, fmtPct, parseNum, debounce, toast, confirmar, redondear, costoUnitarioIng, modal, colorMargen, esc };
 })();

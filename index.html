@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1e40af" />
-  <title>Casa Comida · Costos y Precios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>Casa Comida</title>
 
   <link rel="stylesheet" href="css/variables.css" />
   <link rel="stylesheet" href="css/global.css" />
@@ -14,24 +14,20 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
 
   <!-- LOGIN -->
   <section id="auth-screen" class="auth-screen">
-    <div class="auth-card">
+    <div class="auth-inner">
       <div class="auth-logo">🍳</div>
       <h1>Casa Comida</h1>
-      <p class="muted">Sistema de costos y precios por porción</p>
+      <p class="muted">Costos y precios simples</p>
 
       <form id="login-form" class="auth-form">
-        <label>Email
-          <input type="email" id="login-email" required autocomplete="email" />
-        </label>
-        <label>Contraseña
-          <input type="password" id="login-pass" required autocomplete="current-password" />
-        </label>
+        <input type="email" id="login-email" placeholder="Email" required autocomplete="email" />
+        <input type="password" id="login-pass" placeholder="Contraseña" required autocomplete="current-password" />
         <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
         <button type="button" id="btn-register" class="btn btn-ghost btn-block">Crear cuenta</button>
         <button type="button" id="btn-anon" class="btn btn-link">Ingresar como invitado</button>
@@ -41,169 +37,170 @@
 
   <!-- APP -->
   <div id="app" class="app hidden">
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-head">
-        <span class="brand">🍳 Casa Comida</span>
-        <button class="icon-btn sidebar-close" id="sidebar-close" aria-label="Cerrar menú">✕</button>
-      </div>
-      <nav class="nav" id="nav">
-        <button class="nav-item active" data-route="dashboard"><span>📊</span> Dashboard</button>
-        <button class="nav-item" data-route="ingredientes"><span>🥕</span> Ingredientes</button>
-        <button class="nav-item" data-route="recetas"><span>📖</span> Recetas</button>
-        <button class="nav-item" data-route="costos"><span>💰</span> Costos adicionales</button>
-        <button class="nav-item" data-route="calculadora"><span>🧮</span> Calculadora</button>
-      </nav>
-      <div class="sidebar-foot">
-        <span id="user-email" class="muted small"></span>
-        <button id="btn-logout" class="btn btn-ghost btn-sm">Salir</button>
-      </div>
-    </aside>
 
-    <main class="main">
-      <header class="topbar">
-        <button class="icon-btn" id="sidebar-open" aria-label="Abrir menú">☰</button>
-        <h2 id="page-title">Dashboard</h2>
-        <div class="topbar-actions">
-          <span id="sync-indicator" class="sync-dot" title="Sincronizado"></span>
-        </div>
-      </header>
+    <header class="topbar">
+      <h1 id="page-title">Inicio</h1>
+      <button id="btn-logout" class="icon-btn" aria-label="Salir">⎋</button>
+    </header>
 
+    <main class="content">
+
+      <!-- DASHBOARD -->
       <section class="page" id="page-dashboard">
-        <div class="stats-grid">
-          <div class="stat-card"><span class="stat-label">Ingredientes</span><span class="stat-value" id="stat-ing">0</span></div>
-          <div class="stat-card"><span class="stat-label">Recetas</span><span class="stat-value" id="stat-rec">0</span></div>
-          <div class="stat-card"><span class="stat-label">Productos</span><span class="stat-value" id="stat-prod">0</span></div>
-          <div class="stat-card"><span class="stat-label">Margen promedio</span><span class="stat-value" id="stat-margen">—</span></div>
+        <div class="hero">
+          <span class="hero-hello" id="hello-user">Hola</span>
+          <span class="hero-sub">Este es el estado de tu negocio</span>
         </div>
 
-        <div class="card">
-          <div class="card-head">
-            <h3>Productos</h3>
-            <input type="search" id="search-productos" class="input" placeholder="Buscar producto..." />
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-num" id="stat-ing">0</span>
+            <span class="stat-lbl">Ingredientes</span>
           </div>
-          <div class="table-wrap">
-            <table class="table">
-              <thead>
-                <tr><th>Producto</th><th>Costo</th><th>Precio</th><th>Margen</th><th></th></tr>
-              </thead>
-              <tbody id="tbl-productos"></tbody>
-            </table>
+          <div class="stat">
+            <span class="stat-num" id="stat-rec">0</span>
+            <span class="stat-lbl">Recetas</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num" id="stat-prod">0</span>
+            <span class="stat-lbl">Productos</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num" id="stat-margen">—</span>
+            <span class="stat-lbl">Margen prom.</span>
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="card">
-            <h3>Distribución de márgenes</h3>
-            <canvas id="chart-margenes"></canvas>
-          </div>
-          <div class="card">
-            <h3>Top productos por margen</h3>
-            <canvas id="chart-top"></canvas>
-          </div>
+        <div class="section-head">
+          <h2>Productos</h2>
+          <input type="search" id="search-productos" class="search" placeholder="Buscar producto..." />
         </div>
+
+        <div class="list" id="list-productos"></div>
       </section>
 
+      <!-- INGREDIENTES -->
       <section class="page hidden" id="page-ingredientes">
-        <div class="card">
-          <div class="card-head">
-            <h3>Ingredientes</h3>
-            <div class="row gap">
-              <input type="search" id="search-ing" class="input" placeholder="Buscar..." />
-              <button class="btn btn-primary" id="btn-new-ing">+ Nuevo</button>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Nombre</th><th>Unidad</th><th>Cantidad base</th>
-                  <th>Precio compra</th><th>Merma %</th><th>Costo unitario</th><th></th>
-                </tr>
-              </thead>
-              <tbody id="tbl-ing"></tbody>
-            </table>
-          </div>
+        <div class="section-head">
+          <h2>Ingredientes</h2>
+          <input type="search" id="search-ing" class="search" placeholder="Buscar..." />
         </div>
+        <div class="list" id="list-ing"></div>
       </section>
 
+      <!-- RECETAS -->
       <section class="page hidden" id="page-recetas">
-        <div class="card">
-          <div class="card-head">
-            <h3>Recetas</h3>
-            <div class="row gap">
-              <input type="search" id="search-rec" class="input" placeholder="Buscar..." />
-              <button class="btn btn-primary" id="btn-new-rec">+ Nueva</button>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table class="table">
-              <thead><tr><th>Nombre</th><th>Ingredientes</th><th>Merma %</th><th>Costo total</th><th></th></tr></thead>
-              <tbody id="tbl-rec"></tbody>
-            </table>
-          </div>
+        <div class="section-head">
+          <h2>Recetas</h2>
+          <input type="search" id="search-rec" class="search" placeholder="Buscar..." />
         </div>
+        <div class="list" id="list-rec"></div>
       </section>
 
+      <!-- COSTOS -->
       <section class="page hidden" id="page-costos">
-        <div class="card">
-          <div class="card-head">
-            <h3>Costos adicionales</h3>
-            <button class="btn btn-primary" id="btn-new-costo">+ Nuevo</button>
+        <div class="section-head">
+          <h2>Costos adicionales</h2>
+        </div>
+        <p class="muted small">Envase, mano de obra, gas, etc. Se suman al costo de cada receta.</p>
+        <div class="list" id="list-costos"></div>
+      </section>
+
+      <!-- CALCULADORA -->
+      <section class="page hidden" id="page-calculadora">
+        <div class="section-head"><h2>Calculadora</h2></div>
+
+        <div class="card card-soft">
+          <label class="field">
+            <span>Receta</span>
+            <select id="calc-receta" class="input"></select>
+          </label>
+
+          <label class="field">
+            <span>Porciones que rinde</span>
+            <input type="number" id="calc-porciones" class="input" value="1" min="1" />
+          </label>
+
+          <label class="field">
+            <span>Método</span>
+            <select id="calc-metodo" class="input">
+              <option value="objetivo">Margen objetivo (recomendado)</option>
+              <option value="sobre">Margen sobre costo</option>
+            </select>
+          </label>
+
+          <div class="field">
+            <span class="slider-head">Margen: <strong id="calc-margen-label">75%</strong></span>
+            <input type="range" id="calc-margen" min="0" max="200" value="75" />
           </div>
-          <div class="table-wrap">
-            <table class="table">
-              <thead><tr><th>Nombre</th><th>Tipo</th><th>Monto</th><th>Prorratear</th><th>Aplicar</th><th></th></tr></thead>
-              <tbody id="tbl-costos"></tbody>
-            </table>
+
+          <label class="field">
+            <span>Redondeo</span>
+            <select id="calc-redondeo" class="input">
+              <option value="0">Sin redondeo</option>
+              <option value="50">A $0.50</option>
+              <option value="100" selected>A $1.00</option>
+              <option value="500">A $5.00</option>
+              <option value="10000">A $100</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="card result-card">
+          <div class="result-row">
+            <span class="muted">Costo ingredientes</span>
+            <span id="res-ing">$0</span>
           </div>
+          <div class="result-row">
+            <span class="muted">Costo adicionales</span>
+            <span id="res-adic">$0</span>
+          </div>
+          <div class="result-row">
+            <span class="muted">Costo por porción</span>
+            <span id="res-porcion">$0</span>
+          </div>
+          <div class="divider"></div>
+          <div class="result-big">
+            <span>Precio de venta</span>
+            <strong id="res-precio">$0</strong>
+          </div>
+          <div class="result-row">
+            <span class="muted">Margen real</span>
+            <span id="res-margen">0%</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="btn-save-precio">Guardar producto</button>
+
+        <div class="card" id="hist-wrap">
+          <h3 class="mini-h">Último histórico</h3>
+          <ul id="hist-precios" class="hist-list"></ul>
         </div>
       </section>
 
-      <section class="page hidden" id="page-calculadora">
-        <div class="grid-2">
-          <div class="card">
-            <h3>Configuración</h3>
-            <label>Receta
-              <select id="calc-receta" class="input"></select>
-            </label>
-            <label>Porciones
-              <input type="number" id="calc-porciones" class="input" value="1" min="1" />
-            </label>
-            <label>Método
-              <select id="calc-metodo" class="input">
-                <option value="sobre">Margen sobre costo</option>
-                <option value="objetivo">Margen objetivo</option>
-              </select>
-            </label>
-            <label>Margen: <strong id="calc-margen-label">75%</strong>
-              <input type="range" id="calc-margen" min="0" max="300" value="75" />
-            </label>
-            <label>Redondeo
-              <select id="calc-redondeo" class="input">
-                <option value="0">Sin redondeo</option>
-                <option value="50">A $0.50</option>
-                <option value="100" selected>A $1.00</option>
-                <option value="500">A $5.00</option>
-              </select>
-            </label>
-            <button class="btn btn-primary btn-block" id="btn-save-precio">Guardar producto</button>
-          </div>
-          <div class="card">
-            <h3>Resultado</h3>
-            <div class="result-grid">
-              <div><span class="muted">Costo ingredientes</span><strong id="res-ing">$0</strong></div>
-              <div><span class="muted">Costo adicionales</span><strong id="res-adic">$0</strong></div>
-              <div><span class="muted">Costo total</span><strong id="res-total">$0</strong></div>
-              <div><span class="muted">Costo por porción</span><strong id="res-porcion">$0</strong></div>
-              <div class="highlight"><span class="muted">Precio final</span><strong id="res-precio">$0</strong></div>
-              <div><span class="muted">Margen real</span><strong id="res-margen">0%</strong></div>
-            </div>
-            <div class="mini-head">Histórico</div>
-            <ul id="hist-precios" class="hist-list"></ul>
-          </div>
-        </div>
-      </section>
     </main>
+
+    <!-- FAB (crear rápido) -->
+    <button class="fab hidden" id="fab" aria-label="Crear">+</button>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="bn-item active" data-route="dashboard">
+        <span class="bn-ico">🏠</span><span>Inicio</span>
+      </button>
+      <button class="bn-item" data-route="ingredientes">
+        <span class="bn-ico">🥕</span><span>Insumos</span>
+      </button>
+      <button class="bn-item" data-route="recetas">
+        <span class="bn-ico">📖</span><span>Recetas</span>
+      </button>
+      <button class="bn-item" data-route="costos">
+        <span class="bn-ico">💰</span><span>Costos</span>
+      </button>
+      <button class="bn-item" data-route="calculadora">
+        <span class="bn-ico">🧮</span><span>Precio</span>
+      </button>
+    </nav>
   </div>
 
   <!-- MODAL GENÉRICO -->
@@ -221,15 +218,12 @@
   <!-- TOASTS -->
   <div id="toasts" class="toasts"></div>
 
-  <!-- Firebase SDK (compat) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <!-- App scripts -->
+  <!-- App -->
   <script src="js/config.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/db.js"></script>

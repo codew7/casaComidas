@@ -1,29 +1,43 @@
-// Orquestación general: routing, suscripciones, inicialización
+// Routing y arranque
 document.addEventListener('DOMContentLoaded', () => {
-  // Sidebar móvil
-  const sidebar = document.getElementById('sidebar');
-  document.getElementById('sidebar-open').onclick = () => sidebar.classList.add('open');
-  document.getElementById('sidebar-close').onclick = () => sidebar.classList.remove('open');
 
-  // Routing
-  document.querySelectorAll('.nav-item').forEach(btn => {
+  const fab = document.getElementById('fab');
+
+  // Bottom nav
+  document.querySelectorAll('.bn-item').forEach(btn => {
     btn.addEventListener('click', () => goto(btn.dataset.route));
   });
 
+  const titles = {
+    dashboard: 'Inicio',
+    ingredientes: 'Ingredientes',
+    recetas: 'Recetas',
+    costos: 'Costos',
+    calculadora: 'Calculadora'
+  };
+
+  // Rutas que muestran el FAB para crear elementos
+  const fabHandlers = {
+    ingredientes: () => Ingredientes.abrirForm(),
+    recetas: () => Recetas.abrirForm(),
+    costos: () => Costos.abrirForm()
+  };
+
   function goto(route) {
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.route === route));
+    document.querySelectorAll('.bn-item').forEach(b => b.classList.toggle('active', b.dataset.route === route));
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
     const page = document.getElementById('page-' + route);
     if (page) page.classList.remove('hidden');
-    const titles = {
-      dashboard: 'Dashboard',
-      ingredientes: 'Ingredientes',
-      recetas: 'Recetas',
-      costos: 'Costos adicionales',
-      calculadora: 'Calculadora'
-    };
     document.getElementById('page-title').textContent = titles[route] || '';
-    sidebar.classList.remove('open');
+
+    // FAB visible sólo en páginas con acción de crear
+    if (fabHandlers[route]) {
+      fab.classList.remove('hidden');
+      fab.onclick = fabHandlers[route];
+    } else {
+      fab.classList.add('hidden');
+      fab.onclick = null;
+    }
 
     if (route === 'dashboard') Dashboard.render();
     if (route === 'ingredientes') Ingredientes.render();
@@ -41,9 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
   Dashboard.init();
 
   Auth.init(() => {
-    // Una vez autenticado, suscribirse a datos
     const redraw = () => {
-      const active = document.querySelector('.nav-item.active')?.dataset.route || 'dashboard';
+      const active = document.querySelector('.bn-item.active')?.dataset.route || 'dashboard';
       goto(active);
     };
     DB.subscribe('ingredientes', redraw);

@@ -2,7 +2,6 @@ const Ingredientes = (() => {
   let filtro = '';
 
   function init() {
-    document.getElementById('btn-new-ing').onclick = () => abrirForm();
     document.getElementById('search-ing').addEventListener('input', Utils.debounce((e) => {
       filtro = e.target.value.toLowerCase();
       render();
@@ -10,56 +9,64 @@ const Ingredientes = (() => {
   }
 
   function render() {
-    const tbody = document.getElementById('tbl-ing');
-    if (!tbody) return;
+    const list = document.getElementById('list-ing');
+    if (!list) return;
     const data = DB.all('ingredientes')
       .filter(i => !filtro || i.nombre.toLowerCase().includes(filtro))
       .sort((a, b) => a.nombre.localeCompare(b.nombre));
 
     if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="7" class="center muted">Sin ingredientes. Creá el primero.</td></tr>`;
+      list.innerHTML = `<div class="empty">
+        <span class="empty-ico">🥕</span>
+        <p>Aún no cargaste ingredientes.</p>
+        <button class="btn btn-primary" id="empty-new-ing">Agregar primer ingrediente</button>
+      </div>`;
+      document.getElementById('empty-new-ing').onclick = () => abrirForm();
       return;
     }
 
-    tbody.innerHTML = data.map(i => {
+    list.innerHTML = data.map(i => {
       const cu = Utils.costoUnitarioIng(i);
-      return `<tr>
-        <td><strong>${escapeHtml(i.nombre)}</strong></td>
-        <td>${i.unidad}</td>
-        <td>${i.cantidad}</td>
-        <td>${Utils.fmtMoney(i.precio)}</td>
-        <td>${i.merma || 0}%</td>
-        <td><strong>${Utils.fmtMoney(cu)}</strong> / ${i.unidad}</td>
-        <td class="actions">
-          <button class="btn btn-ghost btn-sm" data-edit="${i.id}">Editar</button>
-          <button class="btn btn-danger btn-sm" data-del="${i.id}">×</button>
-        </td>
-      </tr>`;
+      return `<div class="item" data-edit="${i.id}">
+        <div class="item-body">
+          <div class="item-title">${Utils.esc(i.nombre)}</div>
+          <div class="item-sub">${Utils.fmtMoney(i.precio)} / ${i.cantidad} ${i.unidad}</div>
+        </div>
+        <div class="item-right">
+          <span class="item-price">${Utils.fmtMoney(cu)}</span>
+          <span class="muted small">por ${i.unidad}</span>
+        </div>
+      </div>`;
     }).join('');
 
-    tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => abrirForm(b.dataset.edit));
-    tbody.querySelectorAll('[data-del]').forEach(b => b.onclick = () => borrar(b.dataset.del));
+    list.querySelectorAll('[data-edit]').forEach(el => el.onclick = () => abrirForm(el.dataset.edit));
   }
 
   function abrirForm(id) {
-    const ing = id ? DB.get('ingredientes', id) : { nombre: '', unidad: 'g', cantidad: 1000, precio: 0, merma: 0 };
+    const ing = id ? DB.get('ingredientes', id) : { nombre: '', unidad: 'g', cantidad: 1000, precio: 0 };
     Utils.modal.open({
       titulo: id ? 'Editar ingrediente' : 'Nuevo ingrediente',
       html: `
-        <label>Nombre<input id="f-nombre" value="${escapeAttr(ing.nombre)}" required /></label>
-        <div class="grid-2">
-          <label>Unidad
-            <select id="f-unidad">
-              ${['g','kg','ml','l','unidad'].map(u => `<option ${ing.unidad===u?'selected':''}>${u}</option>`).join('')}
-            </select>
-          </label>
-          <label>Cantidad base<input type="number" step="any" min="0" id="f-cantidad" value="${ing.cantidad||0}" /></label>
-        </div>
-        <div class="grid-2">
-          <label>Precio compra<input type="number" step="any" min="0" id="f-precio" value="${ing.precio||0}" /></label>
-          <label>Merma %<input type="number" step="any" min="0" max="100" id="f-merma" value="${ing.merma||0}" /></label>
-        </div>
-        <p class="muted small">Costo unitario = precio / (cantidad × (1 - merma%))</p>
+        <label class="field">
+          <span>Nombre</span>
+          <input id="f-nombre" class="input" value="${Utils.esc(ing.nombre)}" placeholder="Ej: Harina 000" />
+        </label>
+        <label class="field">
+          <span>Unidad de medida</span>
+          <select id="f-unidad" class="input">
+            ${['g','kg','ml','l','unidad'].map(u => `<option ${ing.unidad===u?'selected':''}>${u}</option>`).join('')}
+          </select>
+        </label>
+        <label class="field">
+          <span>Cantidad que compraste</span>
+          <input type="number" step="any" min="0" inputmode="decimal" id="f-cantidad" class="input" value="${ing.cantidad||0}" />
+        </label>
+        <label class="field">
+          <span>Precio total pagado</span>
+          <input type="number" step="any" min="0" inputmode="decimal" id="f-precio" class="input" value="${ing.precio||0}" />
+        </label>
+        <p class="muted small">Ejemplo: 1000 g por $2.500 → costo $2.50/g</p>
+        ${id ? `<button type="button" class="btn btn-danger btn-block mt-3" id="f-del">Eliminar</button>` : ''}
       `,
       botones: [
         { text: 'Cancelar' },
@@ -70,28 +77,26 @@ const Ingredientes = (() => {
             nombre: document.getElementById('f-nombre').value.trim(),
             unidad: document.getElementById('f-unidad').value,
             cantidad: Utils.parseNum(document.getElementById('f-cantidad').value),
-            precio: Utils.parseNum(document.getElementById('f-precio').value),
-            merma: Utils.parseNum(document.getElementById('f-merma').value)
+            precio: Utils.parseNum(document.getElementById('f-precio').value)
           };
-          if (!nuevo.nombre) { Utils.toast('Nombre requerido', 'warn'); return false; }
+          if (!nuevo.nombre) { Utils.toast('Falta el nombre', 'warn'); return false; }
           if (nuevo.cantidad <= 0 || nuevo.precio < 0) { Utils.toast('Valores inválidos', 'warn'); return false; }
           await DB.save('ingredientes', nuevo);
-          Utils.toast('Ingrediente guardado', 'success');
+          Utils.toast('Guardado', 'success');
         }}
       ]
     });
+
+    if (id) {
+      document.getElementById('f-del').onclick = async () => {
+        if (await Utils.confirmar(`¿Eliminar "${ing.nombre}"?`)) {
+          await DB.remove('ingredientes', id);
+          Utils.modal.close();
+          Utils.toast('Eliminado', 'info');
+        }
+      };
+    }
   }
 
-  async function borrar(id) {
-    const ing = DB.get('ingredientes', id);
-    if (!ing) return;
-    if (!await Utils.confirmar(`¿Eliminar "${ing.nombre}"?`)) return;
-    await DB.remove('ingredientes', id);
-    Utils.toast('Ingrediente eliminado', 'info');
-  }
-
-  function escapeHtml(s='') { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  function escapeAttr(s='') { return escapeHtml(s); }
-
-  return { init, render };
+  return { init, render, abrirForm };
 })();

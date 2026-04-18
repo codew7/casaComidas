@@ -97,10 +97,7 @@ const DB = (() => {
   }
 
   function setSync(ok) {
-    const dot = document.getElementById('sync-indicator');
-    if (!dot) return;
-    dot.classList.toggle('offline', !ok);
-    dot.title = ok ? 'Sincronizado' : 'Sin conexión';
+    // Indicador visual eliminado; mantenemos el hook para futuros usos.
   }
 
   window.addEventListener('online', () => { App.state.online = true; setSync(true); syncPending(); });

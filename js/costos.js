@@ -1,56 +1,55 @@
 const Costos = (() => {
-  function init() {
-    document.getElementById('btn-new-costo').onclick = () => abrirForm();
-  }
+  function init() {}
 
   function render() {
-    const tbody = document.getElementById('tbl-costos');
-    if (!tbody) return;
+    const list = document.getElementById('list-costos');
+    if (!list) return;
     const data = DB.all('costos').sort((a,b) => a.nombre.localeCompare(b.nombre));
 
     if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="6" class="center muted">Sin costos adicionales.</td></tr>`;
+      list.innerHTML = `<div class="empty">
+        <span class="empty-ico">💰</span>
+        <p>Sin costos adicionales aún.</p>
+        <button class="btn btn-primary" id="empty-new-costo">Agregar costo</button>
+      </div>`;
+      document.getElementById('empty-new-costo').onclick = () => abrirForm();
       return;
     }
 
-    tbody.innerHTML = data.map(c => `<tr>
-      <td><strong>${esc(c.nombre)}</strong></td>
-      <td>${c.tipo}</td>
-      <td>${Utils.fmtMoney(c.monto)}</td>
-      <td>${c.prorratear ? 'Sí' : 'No'}</td>
-      <td>${c.aplicar === 'todas' ? 'Todas' : 'Selectivo'}</td>
-      <td class="actions">
-        <button class="btn btn-ghost btn-sm" data-edit="${c.id}">Editar</button>
-        <button class="btn btn-danger btn-sm" data-del="${c.id}">×</button>
-      </td>
-    </tr>`).join('');
+    list.innerHTML = data.map(c => `<div class="item" data-edit="${c.id}">
+      <div class="item-body">
+        <div class="item-title">${Utils.esc(c.nombre)}</div>
+        <div class="item-sub">${c.prorratear ? 'Por porción' : 'Fijo por receta'}</div>
+      </div>
+      <div class="item-right">
+        <span class="item-price">${Utils.fmtMoney(c.monto)}</span>
+      </div>
+    </div>`).join('');
 
-    tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => abrirForm(b.dataset.edit));
-    tbody.querySelectorAll('[data-del]').forEach(b => b.onclick = () => borrar(b.dataset.del));
+    list.querySelectorAll('[data-edit]').forEach(el => el.onclick = () => abrirForm(el.dataset.edit));
   }
 
   function abrirForm(id) {
-    const c = id ? DB.get('costos', id) : { nombre: '', tipo: 'fijo', monto: 0, prorratear: false, aplicar: 'todas' };
+    const c = id ? DB.get('costos', id) : { nombre: '', monto: 0, prorratear: true };
     Utils.modal.open({
       titulo: id ? 'Editar costo' : 'Nuevo costo',
       html: `
-        <label>Nombre<input id="f-nombre" value="${escAttr(c.nombre)}" /></label>
-        <div class="grid-2">
-          <label>Tipo
-            <select id="f-tipo">
-              <option value="fijo" ${c.tipo==='fijo'?'selected':''}>Fijo</option>
-              <option value="variable" ${c.tipo==='variable'?'selected':''}>Variable</option>
-            </select>
-          </label>
-          <label>Monto<input type="number" step="any" min="0" id="f-monto" value="${c.monto||0}" /></label>
-        </div>
-        <label><input type="checkbox" id="f-prorr" ${c.prorratear?'checked':''} /> Prorratear por cantidad de porciones</label>
-        <label>Aplicar a
-          <select id="f-apl">
-            <option value="todas" ${c.aplicar==='todas'?'selected':''}>Todas las recetas</option>
-            <option value="selectivo" ${c.aplicar==='selectivo'?'selected':''}>Selectivo (elegir en calculadora)</option>
+        <label class="field">
+          <span>Nombre</span>
+          <input id="f-nombre" class="input" value="${Utils.esc(c.nombre)}" placeholder="Ej: Envase, bandeja, servilleta" />
+        </label>
+        <label class="field">
+          <span>Monto</span>
+          <input type="number" step="any" min="0" inputmode="decimal" id="f-monto" class="input" value="${c.monto||0}" />
+        </label>
+        <label class="field">
+          <span>¿Cómo se aplica?</span>
+          <select id="f-prorr" class="input">
+            <option value="1" ${c.prorratear?'selected':''}>Por cada porción (ej: envase individual)</option>
+            <option value="0" ${!c.prorratear?'selected':''}>Una vez por receta completa</option>
           </select>
         </label>
+        ${id ? `<button type="button" class="btn btn-danger btn-block mt-3" id="f-del">Eliminar</button>` : ''}
       `,
       botones: [
         { text: 'Cancelar' },
@@ -59,39 +58,33 @@ const Costos = (() => {
             ...(id ? c : {}),
             id: c.id,
             nombre: document.getElementById('f-nombre').value.trim(),
-            tipo: document.getElementById('f-tipo').value,
             monto: Utils.parseNum(document.getElementById('f-monto').value),
-            prorratear: document.getElementById('f-prorr').checked,
-            aplicar: document.getElementById('f-apl').value
+            prorratear: document.getElementById('f-prorr').value === '1'
           };
-          if (!nuevo.nombre) { Utils.toast('Nombre requerido', 'warn'); return false; }
+          if (!nuevo.nombre) { Utils.toast('Falta el nombre', 'warn'); return false; }
           await DB.save('costos', nuevo);
-          Utils.toast('Costo guardado', 'success');
+          Utils.toast('Guardado', 'success');
         }}
       ]
     });
+
+    if (id) {
+      document.getElementById('f-del').onclick = async () => {
+        if (await Utils.confirmar(`¿Eliminar "${c.nombre}"?`)) {
+          await DB.remove('costos', id);
+          Utils.modal.close();
+          Utils.toast('Eliminado', 'info');
+        }
+      };
+    }
   }
 
-  async function borrar(id) {
-    const c = DB.get('costos', id);
-    if (!c) return;
-    if (!await Utils.confirmar(`¿Eliminar "${c.nombre}"?`)) return;
-    await DB.remove('costos', id);
-    Utils.toast('Costo eliminado', 'info');
-  }
-
-  // Devuelve el total de costos adicionales aplicable a una receta, por porciones
   function totalAplicable(porciones = 1) {
-    return DB.all('costos')
-      .filter(c => c.aplicar === 'todas')
-      .reduce((s, c) => {
-        const monto = Utils.parseNum(c.monto);
-        return s + (c.prorratear ? monto * porciones : monto);
-      }, 0);
+    return DB.all('costos').reduce((s, c) => {
+      const monto = Utils.parseNum(c.monto);
+      return s + (c.prorratear ? monto * porciones : monto);
+    }, 0);
   }
 
-  function esc(s='') { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  function escAttr(s='') { return esc(s); }
-
-  return { init, render, totalAplicable };
+  return { init, render, abrirForm, totalAplicable };
 })();

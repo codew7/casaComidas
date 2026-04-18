@@ -28,8 +28,15 @@ const Calculadora = (() => {
   function render() {
     const recs = DB.all('recetas').sort((a,b) => a.nombre.localeCompare(b.nombre));
     const actual = el.receta.value;
-    el.receta.innerHTML = '<option value="">Seleccionar receta...</option>' +
-      recs.map(r => `<option value="${r.id}" ${r.id===actual?'selected':''}>${escapeHtml(r.nombre)}</option>`).join('');
+
+    if (!recs.length) {
+      el.receta.innerHTML = '<option value="">Primero creá una receta</option>';
+      el.receta.disabled = true;
+    } else {
+      el.receta.disabled = false;
+      el.receta.innerHTML = '<option value="">Elegir receta...</option>' +
+        recs.map(r => `<option value="${r.id}" ${r.id===actual?'selected':''}>${Utils.esc(r.nombre)}</option>`).join('');
+    }
     recalc();
   }
 
@@ -39,7 +46,7 @@ const Calculadora = (() => {
     const porciones = Math.max(1, Utils.parseNum(el.porciones.value) || 1);
 
     if (!recetaActual) {
-      setResult({ ing: 0, adic: 0, total: 0, porcion: 0, precio: 0, margen: 0 });
+      setResult({ ing: 0, adic: 0, porcion: 0, precio: 0, margen: 0 });
       renderHist(null);
       return;
     }
@@ -63,22 +70,13 @@ const Calculadora = (() => {
 
     const margenReal = precioPorcion > 0 ? ((precioPorcion - porcion) / precioPorcion) * 100 : 0;
 
-    setResult({
-      ing: costoIng,
-      adic: costoAdic,
-      total,
-      porcion,
-      precio: precioPorcion,
-      margen: margenReal
-    });
-
+    setResult({ ing: costoIng, adic: costoAdic, porcion, precio: precioPorcion, margen: margenReal });
     renderHist(recetaActual);
   }
 
   function setResult(r) {
     document.getElementById('res-ing').textContent = Utils.fmtMoney(r.ing);
     document.getElementById('res-adic').textContent = Utils.fmtMoney(r.adic);
-    document.getElementById('res-total').textContent = Utils.fmtMoney(r.total);
     document.getElementById('res-porcion').textContent = Utils.fmtMoney(r.porcion);
     document.getElementById('res-precio').textContent = Utils.fmtMoney(r.precio);
     document.getElementById('res-margen').textContent = Utils.fmtPct(r.margen);
@@ -86,12 +84,15 @@ const Calculadora = (() => {
 
   function renderHist(rec) {
     const ul = document.getElementById('hist-precios');
-    if (!rec) { ul.innerHTML = '<li class="muted">—</li>'; return; }
+    const wrap = document.getElementById('hist-wrap');
+    if (!rec) { wrap.style.display = 'none'; return; }
     const prod = DB.all('productos').find(p => p.recetaId === rec.id);
     const h = (prod && prod.historico) || [];
-    ul.innerHTML = h.length
-      ? h.slice(-3).reverse().map(x => `<li><span>${new Date(x.fecha).toLocaleDateString('es-AR')}</span><span>${Utils.fmtMoney(x.precio)} · ${Utils.fmtPct(x.margen)}</span></li>`).join('')
-      : '<li class="muted">Sin historial</li>';
+    if (!h.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    ul.innerHTML = h.slice(-5).reverse().map(x =>
+      `<li><span class="muted">${new Date(x.fecha).toLocaleDateString('es-AR')}</span><span><strong>${Utils.fmtMoney(x.precio)}</strong> · ${Utils.fmtPct(x.margen)}</span></li>`
+    ).join('');
   }
 
   async function guardar() {
@@ -117,10 +118,8 @@ const Calculadora = (() => {
     producto.historico = (producto.historico || []).concat({ fecha: Date.now(), precio, margen: margenReal }).slice(-10);
 
     await DB.save('productos', producto);
-    Utils.toast('Producto guardado', 'success');
+    Utils.toast('Producto guardado ✓', 'success');
   }
-
-  function escapeHtml(s='') { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
   return { init, render, recalc };
 })();

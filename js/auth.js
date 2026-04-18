@@ -5,8 +5,6 @@ const Auth = (() => {
       if (u) {
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('app').classList.remove('hidden');
-        const mail = document.getElementById('user-email');
-        if (mail) mail.textContent = u.isAnonymous ? 'Invitado' : (u.email || '');
         onReady();
       } else {
         document.getElementById('auth-screen').classList.remove('hidden');

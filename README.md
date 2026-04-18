@@ -4,14 +4,14 @@ Aplicación web (HTML + JS vanilla + Firebase Realtime Database) para calcular c
 
 ## Características
 
-- **Ingredientes**: alta/baja/modificación con cálculo automático de costo unitario (precio / (cantidad × (1 - merma%)))
-- **Recetas**: constructor dinámico de recetas con autocompletado de ingredientes y suma en tiempo real
-- **Costos adicionales**: fijos/variables, prorrateables por porciones
-- **Calculadora**: slider de margen en tiempo real, dos métodos (sobre costo / objetivo), redondeo configurable
-- **Dashboard**: métricas generales, tabla de productos con formato condicional, gráficos (Chart.js)
-- **Firebase Realtime DB**: sincronización en tiempo real, fallback a `localStorage` cuando no hay conexión
+- **UI mobile-first** con bottom nav estilo app nativa, FAB para crear, bottom sheet modal
+- **Ingredientes**: costo unitario automático (precio / cantidad)
+- **Recetas**: constructor dinámico con suma en tiempo real
+- **Costos adicionales**: prorrateables por porción o fijos por receta
+- **Calculadora**: slider de margen en tiempo real, dos métodos (objetivo / sobre costo), redondeo configurable
+- **Dashboard**: métricas y lista de productos con margen a color (sin gráficos, foco en datos clave)
+- **Firebase Realtime DB** + `localStorage` offline
 - **Auth**: email/contraseña o anónimo
-- **Responsive**: mobile-first (breakpoints 420 / 768 / 1024)
 
 ## Estructura
 
