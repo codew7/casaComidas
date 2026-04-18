@@ -1,0 +1,15 @@
+.row { display: flex; align-items: center; }
+.row.gap { gap: var(--space-3); }
+.col { display: flex; flex-direction: column; }
+.col.gap { gap: var(--space-3); }
+.center { text-align: center; }
+.muted { color: var(--c-text-muted); }
+.small { font-size: .8rem; }
+.mt-2 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-5); }
+.mb-2 { margin-bottom: var(--space-3); }
+.fw-600 { font-weight: 600; }
+.text-danger { color: var(--c-danger); }
+.text-accent { color: var(--c-accent-dark); }
+.full { width: 100%; }
+canvas { max-width: 100%; }

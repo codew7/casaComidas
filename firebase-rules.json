@@ -1,0 +1,34 @@
+{
+  "rules": {
+    "usuarios": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        "ingredientes": {
+          "$id": {
+            ".validate": "newData.hasChildren(['nombre','unidad','precio'])",
+            "nombre": { ".validate": "newData.isString() && newData.val().length > 0" },
+            "precio": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "cantidad": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "merma": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" }
+          }
+        },
+        "recetas": {
+          "$id": {
+            ".validate": "newData.hasChild('nombre')"
+          }
+        },
+        "costos": {
+          "$id": {
+            ".validate": "newData.hasChildren(['nombre','monto'])"
+          }
+        },
+        "productos": {
+          "$id": {
+            ".validate": "newData.hasChild('nombre')"
+          }
+        }
+      }
+    }
+  }
+}
